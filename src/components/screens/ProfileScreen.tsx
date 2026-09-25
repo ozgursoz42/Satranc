@@ -106,7 +106,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
             <User className="w-5 h-5 text-amber-600" />
             <span>
               {isInitialSetup
-                ? (currentLang === 'en' ? 'Welcome to Chess Master' : 'Satranca Hoş Geldiniz')
+                ? (currentLang === 'en' ? 'Welcome to Chess' : 'Satranca Hoş Geldiniz')
                 : isEditingCurrent
                 ? (currentLang === 'en' ? 'Edit Profile' : 'Mevcut Profili Düzenle')
                 : isCreatingNew

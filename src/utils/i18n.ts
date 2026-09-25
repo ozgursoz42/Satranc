@@ -41,7 +41,7 @@ export const TRANSLATIONS = {
     pikoGuide: 'Rehber Piko',
 
     // Welcome Screen
-    welcomeTitle: 'Satranç Dünyası',
+    welcomeTitle: 'Satranç',
     welcomeTagline: 'Satrancı temelden ustalığa öğren, yapay zekayla oyna ve kendini geliştir!',
     btnPlayChess: '⚔️ SATRANÇ OYNA',
     btnLearnChess: '🎓 SATRANÇ ÖĞREN',
@@ -106,7 +106,7 @@ export const TRANSLATIONS = {
     boardCoordsDesc: 'Karelerin harf ve rakam koordinatlarını tahta kenarlarında gösterir',
 
     // Arena Screen
-    arenaTitle: '⚔️ Satranç Arenası',
+    arenaTitle: '⚔️ Satranç',
     arenaSubtitle: 'Yapay zekaya veya arkadaşına karşı maç yap',
     modeAi: '🤖 Yapay Zeka',
     modePassPlay: '👥 2 Kişilik (Aynı Cihaz)',
@@ -156,10 +156,16 @@ export const TRANSLATIONS = {
 
     // Quiz Screen
     quizTitleText: 'Bilgi Testi & Sınav',
-    quizCompletedTitle: 'Tebrikler! Testi Tamamladın! 🏆',
+    quizCompletedTitle: 'Tebrikler! Dersi Başarıyla Geçtin! 🏆',
+    quizFailedTitle: 'Dersi Geçemedin! ❌',
     quizScoreLabel: 'Doğru Cevap:',
-    quizSuccessSubtitle: 'Bu dersin tüm bilgilerini başarıyla kavradın ve rozeti kazandın!',
-    quizRetrySubtitle: 'Biraz daha pratik yaparak tüm soruları doğru cevaplayabilirsin.',
+    quizSuccessSubtitle: 'Harika iş! Testi en fazla 1 hata ile tamamlayarak dersi geçtin ve rozeti kazandın!',
+    quizFailedSubtitle: 'Bu dersten geçebilmek için en fazla 1 hata yapabilirsin. Testi tekrar çözmelisin.',
+    quizMistakesLabel: 'Hata Sayısı:',
+    quizMaxMistakesRule: 'Maks. 1 Hata Kuralı',
+    quizMustRetakeNotice: 'Sonraki dersin kilidini açmak için testi en fazla 1 hata ile tekrar çözmelisin.',
+    quizPassedBadge: 'GEÇTİ',
+    quizFailedBadge: 'KALDI',
     nextQuestionBtn: 'Sonraki Soru',
     finishQuizBtn: 'Testi Bitir',
     retakeQuizBtn: 'Testi Tekrar Çöz',
@@ -238,7 +244,7 @@ export const TRANSLATIONS = {
     pikoGuide: 'Guide Piko',
 
     // Welcome Screen
-    welcomeTitle: 'World of Chess',
+    welcomeTitle: 'Chess',
     welcomeTagline: 'Master chess from fundamentals to grandmaster strategy, play AI and improve!',
     btnPlayChess: '⚔️ PLAY CHESS',
     btnLearnChess: '🎓 LEARN CHESS',
@@ -303,7 +309,7 @@ export const TRANSLATIONS = {
     boardCoordsDesc: 'Displays file letters and rank numbers on board borders',
 
     // Arena Screen
-    arenaTitle: '⚔️ Grand Chess Arena',
+    arenaTitle: '⚔️ Chess',
     arenaSubtitle: 'Play against AI engine or a friend in local pass & play',
     modeAi: '🤖 AI Engine',
     modePassPlay: '👥 2 Players (Same Device)',
@@ -353,10 +359,16 @@ export const TRANSLATIONS = {
 
     // Quiz Screen
     quizTitleText: 'Knowledge Quiz & Exam',
-    quizCompletedTitle: 'Congratulations! Quiz Completed! 🏆',
+    quizCompletedTitle: 'Congratulations! Lesson Passed! 🏆',
+    quizFailedTitle: 'Lesson Not Passed! ❌',
     quizScoreLabel: 'Correct Answers:',
-    quizSuccessSubtitle: 'You mastered all the knowledge in this lesson and earned your badge!',
-    quizRetrySubtitle: 'Practice a little more to answer all questions correctly.',
+    quizSuccessSubtitle: 'Great job! You passed the lesson by making at most 1 mistake and earned your badge!',
+    quizFailedSubtitle: 'You can make at most 1 mistake to pass this lesson. Please retake the test.',
+    quizMistakesLabel: 'Mistakes Count:',
+    quizMaxMistakesRule: 'Max 1 Mistake Rule',
+    quizMustRetakeNotice: 'You must retake the test with at most 1 mistake to unlock the next lesson.',
+    quizPassedBadge: 'PASSED',
+    quizFailedBadge: 'FAILED',
     nextQuestionBtn: 'Next Question',
     finishQuizBtn: 'Finish Quiz',
     retakeQuizBtn: 'Retake Quiz',

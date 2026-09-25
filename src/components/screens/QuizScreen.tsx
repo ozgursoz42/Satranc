@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, CheckCircle2, XCircle, Award, Star, ChevronRight, HelpCircle, Volume2, VolumeX, RotateCcw } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, XCircle, Award, Star, ChevronRight, Volume2, VolumeX, RotateCcw, AlertTriangle, ShieldAlert } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { LessonModule, PlayerProfile } from '../../types/game';
 import { sound } from '../../utils/sound';
@@ -36,6 +36,8 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({
   const [currentQIndex, setCurrentQIndex] = useState(0);
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
+  const [correctCount, setCorrectCount] = useState(0);
+  const [wrongCount, setWrongCount] = useState(0);
   const [score, setScore] = useState(0);
   const [isQuizCompleted, setIsQuizCompleted] = useState(false);
   const activeTheme = getThemeById(profile.selectedTheme || 'classic_wood', currentLang);
@@ -49,9 +51,11 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({
 
     if (option.isCorrect) {
       sound.playCorrect();
+      setCorrectCount((prev) => prev + 1);
       setScore((prev) => prev + 20);
     } else {
       sound.playWrong();
+      setWrongCount((prev) => prev + 1);
     }
   };
 
@@ -68,91 +72,187 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({
 
   const finishQuiz = () => {
     setIsQuizCompleted(true);
-    sound.playVictory();
-    try {
-      confetti({ particleCount: 90, spread: 80, origin: { y: 0.5 } });
-    } catch (e) {}
+    const isPassed = wrongCount <= 1;
 
-    const lessonIdx = lessons.findIndex((r) => r.id === lesson.id);
-    const nextLessonIndex = Math.max(profile.unlockedLessonIndex || 0, lessonIdx + 1);
+    if (isPassed) {
+      sound.playVictory();
+      try {
+        confetti({ particleCount: 90, spread: 80, origin: { y: 0.5 } });
+      } catch (e) {}
 
-    const newBadges = [...(profile.unlockedBadges || [])];
-    if (!newBadges.includes(lesson.badgeId)) {
-      newBadges.push(lesson.badgeId);
-      sound.playUnlock();
+      const lessonIdx = lessons.findIndex((r) => r.id === lesson.id);
+      const nextLessonIndex = Math.max(profile.unlockedLessonIndex || 0, lessonIdx + 1);
+
+      const newBadges = [...(profile.unlockedBadges || [])];
+      if (!newBadges.includes(lesson.badgeId)) {
+        newBadges.push(lesson.badgeId);
+        sound.playUnlock();
+      }
+
+      const updatedMissions = {
+        ...(profile.completedMissions || {}),
+        [`${lesson.id}_quiz`]: 3,
+      };
+
+      const updatedProfile: PlayerProfile = {
+        ...profile,
+        stars: profile.stars + score,
+        unlockedLessonIndex: Math.min(6, nextLessonIndex),
+        unlockedBadges: newBadges,
+        completedMissions: updatedMissions,
+      };
+
+      saveActiveProfile(updatedProfile);
+      onProfileUpdated(updatedProfile);
+    } else {
+      sound.playWrong();
     }
-
-    const updatedMissions = {
-      ...(profile.completedMissions || {}),
-      [`${lesson.id}_quiz`]: 3,
-    };
-
-    const updatedProfile: PlayerProfile = {
-      ...profile,
-      stars: profile.stars + score,
-      unlockedLessonIndex: Math.min(6, nextLessonIndex),
-      unlockedBadges: newBadges,
-      completedMissions: updatedMissions,
-    };
-
-    saveActiveProfile(updatedProfile);
-    onProfileUpdated(updatedProfile);
   };
 
   const handleRetakeQuiz = () => {
     setCurrentQIndex(0);
     setSelectedOptionId(null);
     setIsAnswered(false);
+    setCorrectCount(0);
+    setWrongCount(0);
     setScore(0);
     setIsQuizCompleted(false);
   };
 
+  const isPassed = wrongCount <= 1;
+
   if (isQuizCompleted) {
     return (
       <div className="max-w-md mx-auto px-4 py-10 text-center animate-in zoom-in-95 select-none">
-        <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-2xl space-y-5 relative overflow-hidden text-slate-800">
-          <div className="w-20 h-20 rounded-2xl bg-amber-100 border border-amber-300 text-amber-700 flex items-center justify-center text-4xl mx-auto shadow-xs">
-            <Award className="w-10 h-10 text-amber-600" />
-          </div>
+        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-2xl space-y-5 relative overflow-hidden text-slate-800">
+          {isPassed ? (
+            /* PASSED VIEW (0 or 1 mistake) */
+            <>
+              <div className="w-20 h-20 rounded-2xl bg-amber-100 border border-amber-300 text-amber-700 flex items-center justify-center text-4xl mx-auto shadow-xs">
+                <Award className="w-10 h-10 text-amber-600" />
+              </div>
 
-          <div>
-            <h2 className="text-2xl font-display font-black text-slate-900">
-              {tr.quizCompletedTitle}
-            </h2>
-            <p className="text-xs text-slate-500 font-medium mt-1">
-              {tr.quizSuccessSubtitle}
-            </p>
-          </div>
+              <div>
+                <div className="inline-block px-3 py-0.5 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-800 text-xs font-bold uppercase mb-2">
+                  {tr.quizPassedBadge}
+                </div>
+                <h2 className="text-2xl font-display font-black text-slate-900">
+                  {tr.quizCompletedTitle}
+                </h2>
+                <p className="text-xs text-slate-500 font-medium mt-1">
+                  {tr.quizSuccessSubtitle}
+                </p>
+              </div>
 
-          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-center justify-around">
-            <div>
-              <div className="text-[11px] font-bold text-slate-500 uppercase">{tr.score}</div>
-              <div className="text-2xl font-display font-black text-amber-700">+{score} ⭐</div>
-            </div>
-            <div className="w-[1px] h-8 bg-amber-200" />
-            <div>
-              <div className="text-[11px] font-bold text-slate-500 uppercase">{currentLang === 'en' ? 'Badge' : 'Rozet'}</div>
-              <div className="text-sm font-display font-bold text-slate-900">{lesson.badgeName}</div>
-            </div>
-          </div>
+              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 grid grid-cols-3 gap-2 text-center">
+                <div>
+                  <div className="text-[10px] font-bold text-slate-500 uppercase">{currentLang === 'en' ? 'Correct' : 'Doğru'}</div>
+                  <div className="text-lg font-display font-black text-emerald-700">
+                    {correctCount} / {lesson.quiz.length}
+                  </div>
+                </div>
+                <div className="border-x border-amber-200">
+                  <div className="text-[10px] font-bold text-slate-500 uppercase">{tr.quizMistakesLabel}</div>
+                  <div className={`text-lg font-display font-black ${wrongCount === 0 ? 'text-emerald-700' : 'text-amber-700'}`}>
+                    {wrongCount} / 1
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[10px] font-bold text-slate-500 uppercase">{tr.score}</div>
+                  <div className="text-lg font-display font-black text-amber-700">+{score} ⭐</div>
+                </div>
+              </div>
 
-          <div className="space-y-2 pt-2">
-            <button
-              onClick={onReturnToLessons}
-              className="w-full py-3.5 px-6 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-display font-bold text-sm shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
-            >
-              <span>{currentLang === 'en' ? 'Back to Academy' : 'Ders Listesine Dön'}</span>
-              <ChevronRight className="w-4 h-4" />
-            </button>
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between text-left">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center">
+                    <Award className="w-5 h-5 text-amber-600" />
+                  </div>
+                  <div>
+                    <div className="text-[10px] font-bold text-slate-400 uppercase">{currentLang === 'en' ? 'Badge Earned' : 'Kazanılan Rozet'}</div>
+                    <div className="text-xs font-bold text-slate-800">{lesson.badgeName}</div>
+                  </div>
+                </div>
+                <span className="text-xs font-black text-emerald-600">✓ {currentLang === 'en' ? 'Unlocked' : 'Açıldı'}</span>
+              </div>
 
-            <button
-              onClick={handleRetakeQuiz}
-              className="w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-display font-bold text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span>{tr.retakeQuizBtn}</span>
-            </button>
-          </div>
+              <div className="space-y-2 pt-2">
+                <button
+                  onClick={onReturnToLessons}
+                  className="w-full py-3.5 px-6 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-display font-bold text-sm shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <span>{currentLang === 'en' ? 'Back to Academy' : 'Ders Listesine Dön'}</span>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+
+                <button
+                  onClick={handleRetakeQuiz}
+                  className="w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-display font-bold text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>{tr.retakeQuizBtn}</span>
+                </button>
+              </div>
+            </>
+          ) : (
+            /* FAILED VIEW (> 1 mistake) */
+            <>
+              <div className="w-20 h-20 rounded-2xl bg-rose-100 border border-rose-300 text-rose-600 flex items-center justify-center text-4xl mx-auto shadow-xs">
+                <ShieldAlert className="w-10 h-10 text-rose-600" />
+              </div>
+
+              <div>
+                <div className="inline-block px-3 py-0.5 rounded-full bg-rose-100 border border-rose-300 text-rose-800 text-xs font-bold uppercase mb-2">
+                  {tr.quizFailedBadge}
+                </div>
+                <h2 className="text-2xl font-display font-black text-slate-900">
+                  {tr.quizFailedTitle}
+                </h2>
+                <p className="text-xs text-slate-600 font-medium mt-1 leading-relaxed">
+                  {tr.quizFailedSubtitle}
+                </p>
+              </div>
+
+              <div className="bg-rose-50 border border-rose-200 rounded-2xl p-4 grid grid-cols-2 gap-3 text-center">
+                <div>
+                  <div className="text-[10px] font-bold text-slate-500 uppercase">{currentLang === 'en' ? 'Correct' : 'Doğru Cevap'}</div>
+                  <div className="text-xl font-display font-black text-slate-800">
+                    {correctCount} / {lesson.quiz.length}
+                  </div>
+                </div>
+                <div className="border-l border-rose-200">
+                  <div className="text-[10px] font-bold text-rose-600 uppercase">{tr.quizMistakesLabel}</div>
+                  <div className="text-xl font-display font-black text-rose-600">
+                    {wrongCount} <span className="text-xs font-semibold text-rose-500">({currentLang === 'en' ? 'Max: 1' : 'Maks: 1'})</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-left flex items-start gap-2.5">
+                <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                <p className="text-xs text-amber-900 leading-relaxed font-medium">
+                  {tr.quizMustRetakeNotice}
+                </p>
+              </div>
+
+              <div className="space-y-2 pt-2">
+                <button
+                  onClick={handleRetakeQuiz}
+                  className="w-full py-3.5 px-6 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-display font-black text-sm shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  <span>{tr.retakeQuizBtn}</span>
+                </button>
+
+                <button
+                  onClick={onReturnToLessons}
+                  className="w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-display font-bold text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <span>{currentLang === 'en' ? 'Back to Academy' : 'Ders Listesine Dön'}</span>
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     );
@@ -185,6 +285,21 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Mistake Counter / Rule badge */}
+            <div
+              className={`px-2.5 py-1 rounded-xl text-xs font-bold border flex items-center gap-1.5 ${
+                wrongCount === 0
+                  ? 'bg-slate-50 border-slate-200 text-slate-600'
+                  : wrongCount === 1
+                  ? 'bg-amber-50 border-amber-300 text-amber-800'
+                  : 'bg-rose-50 border-rose-300 text-rose-700 animate-pulse'
+              }`}
+              title={currentLang === 'en' ? 'Max 1 mistake allowed to pass' : 'Geçmek için en fazla 1 hata yapılabilir'}
+            >
+              <span>{currentLang === 'en' ? 'Mistake:' : 'Hata:'}</span>
+              <span className="font-extrabold">{wrongCount}/1</span>
+            </div>
+
             <span className="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-xl">
               {currentQIndex + 1} / {lesson.quiz.length}
             </span>
@@ -206,6 +321,16 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({
               </button>
             )}
           </div>
+        </div>
+
+        {/* Rule Reminder Banner */}
+        <div className="bg-amber-50/70 border border-amber-200/80 px-4 py-2 rounded-xl flex items-center justify-between text-xs text-amber-900 font-medium">
+          <span>
+            📌 {currentLang === 'en' ? 'Rule: You can make at most 1 mistake to pass the lesson.' : 'Kural: Dersi geçebilmek için en fazla 1 hata yapabilirsin.'}
+          </span>
+          <span className="font-bold text-[11px] text-amber-800 shrink-0 ml-2">
+            {tr.quizMaxMistakesRule}
+          </span>
         </div>
 
         {/* Question Card */}

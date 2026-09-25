@@ -49,7 +49,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
         {/* Title & Tagline */}
         <div className="mb-5">
           <h1 className="text-4xl sm:text-6xl font-display font-black text-slate-900 tracking-tight">
-            {currentLang === 'en' ? 'CHESS MASTER' : 'SATRANÇ DÜNYASI'}
+            {currentLang === 'en' ? 'CHESS' : 'SATRANÇ'}
           </h1>
           <p className="text-xs sm:text-sm font-semibold text-slate-600 font-display mt-1.5 max-w-md mx-auto">
             {tr.welcomeTagline}
