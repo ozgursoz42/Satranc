@@ -1,0 +1,6 @@
+{
+  "name": "Satranç - Öğren & Oyna",
+  "description": "Satrancı temelden ustalığa öğren, bulmacaları çöz, yapay zekaya veya arkadaşlarına karşı oyna. Çoklu temalar ve interaktif dersler.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
